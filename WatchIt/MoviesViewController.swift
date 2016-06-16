@@ -8,6 +8,7 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -23,34 +24,14 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.dataSource = self
         tableView.delegate = self
         
-        let apiKey = "abc06d12299cb0cfc3bb4865fa38b909"
-        let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
-        let request = NSURLRequest(
-            URL: url!,
-            cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringLocalCacheData,
-            timeoutInterval: 10)
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         
-        let session = NSURLSession(
-            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
-            delegate: nil,
-            delegateQueue: NSOperationQueue.mainQueue()
-        )
+        let refreshControl = UIRefreshControl()
+        refreshControlAction(refreshControl)
         
-        let task: NSURLSessionDataTask = session.dataTaskWithRequest(request,completionHandler: { (dataOrNil, response, error) in
-            if let data = dataOrNil {
-                if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
-                    data, options:[]) as? NSDictionary {
-                    print("response: \(responseDictionary)")
-                    
-                    // specify the type of movies
-                    self.movies = responseDictionary["results"] as? [NSDictionary]
-                    self.tableView.reloadData()
-                }
-                
-            }
-        })
-        task.resume()
-
+        refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        tableView.insertSubview(refreshControl, atIndex: 0)
+         
         // Do any additional setup after loading the view.
     }
 
@@ -89,6 +70,52 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         return cell
     }
     
+    func refreshControlAction(refreshControl : UIRefreshControl) {
+        //can/should I move these constants outside of this function?
+        let apiKey = "abc06d12299cb0cfc3bb4865fa38b909"
+        let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        
+        let request = NSURLRequest(
+            URL: url!,
+            cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringLocalCacheData,
+            timeoutInterval: 10)
+        
+        let session = NSURLSession(
+            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
+            delegate: nil,
+            delegateQueue: NSOperationQueue.mainQueue()
+        )
+        
+        
+        
+        let task: NSURLSessionDataTask = session.dataTaskWithRequest(request,completionHandler: { (dataOrNil, response, error) in
+            
+            MBProgressHUD.hideHUDForView(self.view, animated: true)
+            
+            if let data = dataOrNil { //succesful
+                if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
+                    data, options:[]) as? NSDictionary {
+                    print("response: \(responseDictionary)")
+                    
+                    // specify the type of movies
+                    self.movies = responseDictionary["results"] as? [NSDictionary]
+                    self.tableView.reloadData()
+                }
+                
+            }
+            else {
+                print("unsuccessful request!")
+            }
+            
+        });
+        // Reload the tableView now that there is new data
+        self.tableView.reloadData()
+        
+        // Tell the refreshControl to stop spinning
+        refreshControl.endRefreshing()
+        
+        task.resume()
+    }
 
     /*
     // MARK: - Navigation

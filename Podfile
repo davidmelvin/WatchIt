@@ -7,4 +7,5 @@ target 'WatchIt' do
 
   # Pods for WatchIt
     pod 'AFNetworking'
+    pod 'MBProgressHUD'
 end
