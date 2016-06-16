@@ -15,6 +15,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var tableView: UITableView!
     //naming it imageView would conflict with internals
     @IBOutlet weak var posterView: UIImageView!
+    @IBOutlet weak var netorkErrorView: UIView!
+    
     
     var movies: [NSDictionary]?
     
@@ -25,6 +27,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.delegate = self
         
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        self.netorkErrorView.hidden = true;
+        
         
         let refreshControl = UIRefreshControl()
         refreshControlAction(refreshControl)
@@ -93,9 +97,17 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             MBProgressHUD.hideHUDForView(self.view, animated: true)
             
             if let data = dataOrNil { //succesful
+                if (self.netorkErrorView.hidden) {
+                    self.netorkErrorView.hidden = true
+                }
+                
                 if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                     data, options:[]) as? NSDictionary {
-                    print("response: \(responseDictionary)")
+                    //print("response: \(responseDictionary)")
+                    print("gud response!")
+                    if (self.netorkErrorView.hidden) {
+                        self.tableView.frame = CGRectMake( 0, 20, self.tableView.frame.size.width, self.tableView.frame.size.height ); // set new position exactly
+                    }
                     
                     // specify the type of movies
                     self.movies = responseDictionary["results"] as? [NSDictionary]
@@ -105,6 +117,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             }
             else {
                 print("unsuccessful request!")
+                self.netorkErrorView.hidden = false
+                self.tableView.frame = CGRectMake( 0, 48, self.tableView.frame.size.width, self.tableView.frame.size.height ); // set new position exactly
             }
             
         });
