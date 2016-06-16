@@ -105,9 +105,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                     data, options:[]) as? NSDictionary {
                     //print("response: \(responseDictionary)")
                     print("gud response!")
-                    if (self.netorkErrorView.hidden) {
-                        self.tableView.frame = CGRectMake( 0, 20, self.tableView.frame.size.width, self.tableView.frame.size.height ); // set new position exactly
-                    }
+                    self.netorkErrorView.hidden = true
+                        self.tableView.frame = CGRectMake( 0, 20, self.tableView.frame.size.width, self.tableView.frame.size.height + 20); // set new position exactly
+                    
                     
                     // specify the type of movies
                     self.movies = responseDictionary["results"] as? [NSDictionary]
