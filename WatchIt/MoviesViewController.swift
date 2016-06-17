@@ -97,9 +97,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             MBProgressHUD.hideHUDForView(self.view, animated: true)
             
             if let data = dataOrNil { //succesful
-                if (self.netorkErrorView.hidden) {
-                    self.netorkErrorView.hidden = true
-                }
+                
+                self.netorkErrorView.hidden = true
                 
                 if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                     data, options:[]) as? NSDictionary {
